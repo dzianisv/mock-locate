@@ -1,5 +1,10 @@
 name: CI
 
+# The release step creates GitHub Releases, so it needs write access
+# regardless of the repo's default token permissions.
+permissions:
+  contents: write
+
 on:
   push:
     branches: [main]
