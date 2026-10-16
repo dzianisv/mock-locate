@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Cache #1: Gradle home (wrapper dists, dependency modules, build cache).
+      # Mounted into the container, so warm runs skip all downloads.
+      - name: Cache Gradle home
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # Cache #2: Docker layers of the SDK image (JDK + Android SDK packages).
+      # cache-from/to type=gha keeps sdkmanager downloads out of warm runs.
+      - name: Build SDK image (cached layers)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: mocklocate-sdk:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Assemble debug APK inside the SDK container
+        run: |
+          mkdir -p apk-out
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            -v "$HOME/.gradle":/root/.gradle \
+            -v "$PWD/apk-out":/out \
+            mocklocate-sdk:latest \
+            bash -lc "./gradlew --no-daemon --build-cache assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk /out/"
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocklocate-debug-apk
+          path: apk-out/app-debug.apk
+          if-no-files-found: error
+
+      # On tags like v1.0.0 -> create a GitHub Release with the APK attached
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apk-out/app-debug.apk
+          generate_release_notes: true

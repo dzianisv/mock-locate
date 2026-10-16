@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MockLocate</string>
+
+    <string name="tap_hint">Тапните по карте, чтобы поставить точку</string>
+    <string name="coords_format">%1$.5f, %2$.5f</string>
+    <string name="start">Старт</string>
+    <string name="stop">Стоп</string>
+    <string name="my_location">Моё местоположение</string>
+    <string name="idle_status">Мок выключен</string>
+    <string name="mocking_active">Мокаю локацию</string>
+    <string name="mocking_active_coords">Мокаю: %1$.5f, %2$.5f</string>
+    <string name="need_pin">Сначала выберите точку на карте</string>
+    <string name="no_location_yet">Геопозиция пока недоступна</string>
+
+    <string name="mock_not_selected_title">Не выбрано mock-приложение</string>
+    <string name="mock_not_selected_msg">Откройте «Настройки → Для разработчиков → Приложение для фиктивных геоданных» и выберите MockLocate, затем нажмите Старт ещё раз.</string>
+    <string name="open_dev_settings">Открыть настройки</string>
+    <string name="close">Закрыть</string>
+
+    <string name="service_channel">Мок локации</string>
+    <string name="service_notification">Мокаю: %1$.5f, %2$.5f</string>
+    <string name="stop_action">Стоп</string>
+</resources>
